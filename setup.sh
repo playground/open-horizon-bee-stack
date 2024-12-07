@@ -25,6 +25,8 @@ if [ "$current_dir" == "app" ]; then
   cd "$CLONE_DIR" || { echo "Failed to cd into $CLONE_DIR"; exit 1; }
 fi
 
+echo "Current directory is: $(pwd)"
+
 # Ensure setup.sh is executable
 if [ -f "./bee-stack.sh" ]; then
     cp /app/bee-stack.sh .

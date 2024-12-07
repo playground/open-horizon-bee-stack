@@ -46,4 +46,4 @@ COPY ./bee-stack.sh /app
 # Make another script executable and run it
 RUN chmod +x /app/setup.sh
 
-ENTRYPOINT ["sh", "/app/setup.sh"]
+CMD ["./setup.sh"]
