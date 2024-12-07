@@ -56,8 +56,9 @@ choose() {
     local idx=$((SELECTED_NUM + 1))
     SELECTED_OPT="${!idx}"
   else
-    echo "SELECTED_OPT provided"
+    echo "SELECTED_OPT provided ${LLM_SELECTED_OPT}"
     SELECTED_OPT="${LLM_SELECTED_OPT}"
+    configure_watsonx
   fi
 }
 
