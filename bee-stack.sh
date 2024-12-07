@@ -57,6 +57,7 @@ choose() {
     SELECTED_OPT="${!idx}"
   else
     echo "SELECTED_OPT provided"
+    SELECTED_OPT="${LLM_SELECTED_OPT}"
   fi
 }
 
