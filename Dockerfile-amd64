@@ -1,6 +1,8 @@
 # Start with a base image that includes git
 FROM ubuntu:20.04
 
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+
 # Set environment variables to prevent interactive prompts during installation
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -44,4 +46,4 @@ COPY ./bee-stack.sh /app
 # Make another script executable and run it
 RUN chmod +x /app/setup.sh
 
-CMD ["./setup.sh"]
+ENTRYPOINT ["sh", "/setup.sh"]
