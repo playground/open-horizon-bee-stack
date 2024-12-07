@@ -7,12 +7,12 @@ set -e
 REPO_URL="https://github.com/i-am-bee/bee-stack.git"
 CLONE_DIR="bee-stack"
 
-if [ -d "$DIR_NAME/.git" ]; then
-  echo "Directory '$DIR_NAME' exists and is a git repository. Pulling latest changes..."
-  cd "$DIR_NAME"
+if [ -d "$CLONE_DIR/.git" ]; then
+  echo "Directory '$CLONE_DIR' exists and is a git repository. Pulling latest changes..."
+  cd "$CLONE_DIR"
   git pull
 else
-  echo "Directory '$DIR_NAME' does not exist or is not a git repository. Cloning..."
+  echo "Directory '$CLONE_DIR' does not exist or is not a git repository. Cloning..."
   git clone "$REPO_URL"
 fi
 
