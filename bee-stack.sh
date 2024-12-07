@@ -134,6 +134,15 @@ write_env() {
   local default_prompt default_provided value
   default_provided=$([ $# -gt 1 ] && echo 1 || echo 0)
   default_prompt="$([ "$default_provided" -eq 1 ] && echo " (leave empty for default '${2}')" || echo "")"
+
+  # Check if the environment variable is already set
+  if [ -n "${!1}" ]; then
+    value="${!1}"
+    echo "$1=$value" >> "$TMP_ENV_FILE"
+    export "${1}=${value}"
+    return
+  fi
+
   while true; do
     read -rp "Provide ${1}${default_prompt}: " value
     if [ -z "$value" ] && [ "$default_provided" -eq 0 ]; then
@@ -160,15 +169,9 @@ configure_bam() {
 
 configure_watsonx() {
   write_backend watsonx
-  if [ -z "${WATSONX_PROJECT_ID}" ]; then
-    write_env WATSONX_PROJECT_ID
-  fi
-  if [ -z "${WATSONX_API_KEY}" ]; then
-    write_env WATSONX_API_KEY
-  fi
-  if [ -z "${WATSONX_REGION}" ]; then
-    write_env WATSONX_REGION "us-south"
-  fi
+  write_env WATSONX_PROJECT_ID
+  write_env WATSONX_API_KEY
+  write_env WATSONX_REGION "us-south"
 }
 
 configure_ollama() {
