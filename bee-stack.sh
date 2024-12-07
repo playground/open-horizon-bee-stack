@@ -134,15 +134,18 @@ trim() {
 write_env() {
   local default_prompt default_provided value
   default_provided=$([ $# -gt 1 ] && echo 1 || echo 0)
-  default_prompt="$([ "$default_provided" -eq 1 ] && echo " (leave empty for default '${2}')" || echo "")"
+  current_value="${!1}" # Check if the environment variable is already set
 
-  # Check if the environment variable is already set
-  if [ -n "${!1}" ]; then
-    value="${!1}"
+  # If the variable exists in the environment, use its value
+  if [ -n "$current_value" ]; then
+    value="$current_value"
     echo "$1=$value" >> "$TMP_ENV_FILE"
     export "${1}=${value}"
     return
   fi
+
+  # Build the prompt if no existing environment variable is found
+  default_prompt="$([ "$default_provided" -eq 1 ] && echo " (leave empty for default '${2}')" || echo "")"
 
   while true; do
     read -rp "Provide ${1}${default_prompt}: " value
