@@ -16,12 +16,18 @@ else
   git clone "$REPO_URL"
 fi
 
-# Navigate into the cloned repository
-cd "$CLONE_DIR" || { echo "Failed to cd into $CLONE_DIR"; exit 1; }
+# Get the current working directory's basename
+current_dir=$(basename "$(pwd)")
+
+# Check if the current directory is 'app'
+if [ "$current_dir" == "app" ]; then
+  # Navigate into the cloned repository
+  cd "$CLONE_DIR" || { echo "Failed to cd into $CLONE_DIR"; exit 1; }
+fi
 
 # Ensure setup.sh is executable
 if [ -f "./bee-stack.sh" ]; then
-    cp ../bee-stack.sh .
+    cp /app/bee-stack.sh .
     chmod +x ./bee-stack.sh
     echo "Executing bee-stack.sh..."
     ./bee-stack.sh setup
