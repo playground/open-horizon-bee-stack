@@ -1,5 +1,5 @@
 # Start with a base image that includes git
-FROM ubuntu:20.04
+FROM arm64v8/ubuntu:20.04
 
 # Set environment variables to prevent interactive prompts during installation
 ENV DEBIAN_FRONTEND=noninteractive
@@ -7,19 +7,61 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install necessary tools (git, curl, etc.)
 RUN apt-get update && apt-get install -y \
     git \
+    sudo \
+    software-properties-common \
     && rm -rf /var/lib/apt/lists/*
 
-# Set the working directory inside the container
-WORKDIR /app
+# Install dependencies for Docker and Compose
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release
 
-# Clone the GitHub repository
-RUN git clone https://github.com/i-am-bee/bee-stack.git
+# Add Docker's official GPG key
+RUN mkdir -p /etc/apt/keyrings
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 
-# Set the working directory to the cloned repo
-WORKDIR /app/bee-stack
+# Add Docker repository
+RUN echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-# Run setup script to configure LLM provider and start the stack
-RUN chmod +x /app/bee-stack/bee-stack.sh
-RUN ./bee-stack.sh setup
+# Install Docker and Docker Compose plugin
+RUN apt-get update && apt-get install -y \
+    docker-ce \
+    docker-ce-cli \
+    containerd.io \
+    docker-compose-plugin
 
-CMD ["./bee-stack.sh", "setup"]
+# Verify installation
+RUN docker --version && docker compose version
+
+RUN echo $USER
+# Add a user (you can specify the username you prefer)
+RUN useradd -m beeuser
+
+USER root
+
+# Add the user to the docker group
+RUN usermod -aG docker beeuser
+RUN usermod -aG daemon beeuser
+
+# Give the user permission to run Docker commands without `sudo` (optional)
+RUN echo "beeuser ALL=(ALL) NOPASSWD: /usr/bin/docker" > /etc/sudoers.d/beeuser
+
+RUN mkdir -p /home/beeuser 
+COPY setup.sh /home/beeuser/setup.sh
+
+RUN ls -l /home/beeuser
+
+# Make script executable and run it
+RUN chown beeuser:beeuser /home/beeuser/setup.sh
+RUN chmod +x /home/beeuser/setup.sh
+
+# Switch to the user's home directory
+WORKDIR /home/beeuser
+# Set the user as the default user
+USER beeuser
+
+CMD ["./setup.sh"]

@@ -9,17 +9,38 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
+# Install dependencies for Docker and Compose
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release
+
+# Add Docker's official GPG key
+RUN mkdir -p /etc/apt/keyrings
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+# Add Docker repository
+RUN echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# Install Docker and Docker Compose plugin
+RUN apt-get update && apt-get install -y \
+    docker-ce \
+    docker-ce-cli \
+    containerd.io \
+    docker-compose-plugin
+
+# Verify installation
+RUN docker --version && docker compose version
+    
 # Set the working directory inside the container
 WORKDIR /app
 
-# Clone the GitHub repository
-RUN git clone https://github.com/i-am-bee/bee-stack.git
+COPY ./setup.sh /app
 
-# Set the working directory to the cloned repo
-WORKDIR /app/bee-stack
+# Make another script executable and run it
+RUN chmod +x /app/setup.sh
 
-# Run setup script to configure LLM provider and start the stack
-RUN chmod +x /app/bee-stack/bee-stack.sh
-RUN ./bee-stack.sh setup
-
-CMD ["./bee-stack.sh", "setup"]
+CMD ["./setup.sh"]
