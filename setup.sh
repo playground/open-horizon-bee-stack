@@ -21,6 +21,7 @@ cd "$CLONE_DIR" || { echo "Failed to cd into $CLONE_DIR"; exit 1; }
 
 # Ensure setup.sh is executable
 if [ -f "./bee-stack.sh" ]; then
+    cp ../bee-stack.sh .
     chmod +x ./bee-stack.sh
     echo "Executing bee-stack.sh..."
     ./bee-stack.sh setup

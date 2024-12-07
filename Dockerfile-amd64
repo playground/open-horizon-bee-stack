@@ -39,6 +39,7 @@ RUN docker --version && docker compose version
 WORKDIR /app
 
 COPY ./setup.sh /app
+COPY ./bee-stack.sh /app
 
 # Make another script executable and run it
 RUN chmod +x /app/setup.sh
