@@ -36,13 +36,24 @@ RUN apt-get update && apt-get install -y \
 
 # Verify installation
 RUN docker --version && docker compose version
-    
+
+# Install NodeJS
+RUN curl -sL https://deb.nodesource.com/setup_20.x  | bash -
+    RUN apt-get -y install nodejs
+    RUN npm install -g npm
+
 # Set the working directory inside the container
 WORKDIR /app
 
 COPY ./setup.sh /app
 COPY ./bee-stack.sh /app
 COPY ./entrypoint.sh /app
+COPY ./package.json /app
+COPY src /app
+RUN npm install
+RUN npm run build
+
+EXPOSE 8889
 
 # Make another script executable and run it
 RUN chmod +x /app/setup.sh

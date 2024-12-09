@@ -1,0 +1,36 @@
+{
+  "name": "open-horizon-bee-stack",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "rebuild": "del-cli --force dist && npm run build",
+    "build": "tsc",
+    "build:arm64-image": "docker build -t playbox21/open-horizon-bee-stack-express_arm64:$npm_package_version --no-cache -f Dockerfile-arm64 .",
+    "build:amd64-image": "docker build -t playbox21/open-horizon-bee-stack-express_amd64:$npm_package_version --platform linux/amd64 --no-cache -f Dockerfile-amd64 .",
+    "start": "node dist/find-node.js",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch && npm run build:watch"
+  },
+  "keywords": [],
+  "author": "ljeff@us.ibm.com",
+  "license": "ISC",
+  "dependencies": {
+    "@types/jest": "^29.5.14",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "express-fileupload": "^1.5.1",
+    "jest": "^29.7.0",
+    "jsonfile": "^6.1.0",
+    "rxjs": "^7.8.1",
+    "ts-jest": "^29.2.5"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.1",
+    "del-cli": "^6.0.0",
+    "dotenv": "^16.4.7",
+    "nodemon": "^3.1.7",
+    "typescript": "^5.7.2"
+  }
+}
