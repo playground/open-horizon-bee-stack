@@ -14,3 +14,5 @@ echo "Starting main container process..."
 exec "$@"
 
 node dist/find-node.js --port=${port}
+
+./setup.sh

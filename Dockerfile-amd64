@@ -63,5 +63,4 @@ EXPOSE 8889
 RUN chmod +x /app/setup.sh
 RUN chmod +x /app/entrypoint.sh
 
-CMD ["./setup.sh"]
 ENTRYPOINT ["./entrypoint.sh"]
