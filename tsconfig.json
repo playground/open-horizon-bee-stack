@@ -27,7 +27,8 @@
     "./src/**/*.ts"
   ],
   "exclude": [
-    "./src/**/*.test.*"
+    "./src/**/*.test.*",
+    "node_modules", "dist"
   ]
 }
 

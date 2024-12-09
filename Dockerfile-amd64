@@ -45,13 +45,16 @@ RUN curl -sL https://deb.nodesource.com/setup_20.x  | bash -
 # Set the working directory inside the container
 WORKDIR /app
 
-COPY ./setup.sh /app
-COPY ./bee-stack.sh /app
-COPY ./entrypoint.sh /app
-COPY ./package.json /app
-COPY ./tsconfig.json /app
-COPY src /app
+# Copy package files first
+COPY package*.json ./
+
+# Install dependencies
 RUN npm install
+
+# Copy source files
+COPY . .
+
+# Build the TypeScript project
 RUN npm run build
 
 EXPOSE 8889
@@ -61,4 +64,4 @@ RUN chmod +x /app/setup.sh
 RUN chmod +x /app/entrypoint.sh
 
 CMD ["./setup.sh"]
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["./entrypoint.sh"]
