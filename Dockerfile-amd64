@@ -49,6 +49,7 @@ COPY ./setup.sh /app
 COPY ./bee-stack.sh /app
 COPY ./entrypoint.sh /app
 COPY ./package.json /app
+COPY ./tsconfig.json /app
 COPY src /app
 RUN npm install
 RUN npm run build
