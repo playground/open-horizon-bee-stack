@@ -51,3 +51,8 @@ const sleep = (ms) => {
 }
 
 find('node');
+
+exec(`/app/setup.sh`, {maxBuffer: 1024 * 2000}, (err, stdout, stderr) => {
+
+});
+
