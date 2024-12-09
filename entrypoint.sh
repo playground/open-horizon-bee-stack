@@ -11,6 +11,5 @@ trap on_exit SIGTERM
 
 # Start the main process (e.g., your app)
 echo "Starting main container process..."
-exec "$@"
+node dist/find-node.js
 
-node dist/find-node.js --port=${port}
