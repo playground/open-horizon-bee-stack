@@ -50,7 +50,5 @@ const sleep = (ms) => {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-exec(`/app/setup.sh`, {maxBuffer: 1024 * 2000}, (err, stdout, stderr) => {
-  find('node');
-});
+find('node');
 

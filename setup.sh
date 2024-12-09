@@ -29,7 +29,6 @@ echo "Current directory is: $(pwd)"
 
 # Ensure setup.sh is executable
 if [ -f "./bee-stack.sh" ]; then
-    cp /app/bee-stack.sh .
     chmod +x ./bee-stack.sh
     echo "Executing bee-stack.sh..."
     ./bee-stack.sh setup

@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y \
 # Install dependencies for Docker and Compose
 RUN apt-get update && apt-get install -y \
     ca-certificates \
+    vim \
     curl \
     gnupg \
     lsb-release
@@ -62,5 +63,7 @@ EXPOSE 8889
 # Make another script executable and run it
 RUN chmod +x /app/setup.sh
 RUN chmod +x /app/entrypoint.sh
+
+RUN echo "source /app/setup.sh" >> ~/.bashrc
 
 ENTRYPOINT ["./entrypoint.sh"]
