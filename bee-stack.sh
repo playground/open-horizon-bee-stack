@@ -43,7 +43,11 @@ choose() {
     echo "[${i}]: ${!choice}"
   done
 
-  if [ -z "${LLM_SELECTED_OPT}" ]; then
+  if [ -n "${LLM_SELECTED_OPT}" ]; then
+    echo "LLM_SELECTED_OPT is set to '${LLM_SELECTED_OPT}'. Automatically selecting."
+    SELECTED_OPT="${LLM_SELECTED_OPT}"
+    configure_watsonx
+  else
     while true; do
       read -rp "Select ${range}: " SELECTED_NUM
       if ! [[ "$SELECTED_NUM" =~ ^[0-9]+$ ]]; then print_error "Please enter a valid number"; continue; fi
@@ -55,14 +59,16 @@ choose() {
 
     local idx=$((SELECTED_NUM + 1))
     SELECTED_OPT="${!idx}"
-  else
-    echo "SELECTED_OPT provided ${LLM_SELECTED_OPT}"
-    SELECTED_OPT="${LLM_SELECTED_OPT}"
-    configure_watsonx
   fi
 }
 
 ask_yes_no() {
+  if [ -n "${AUTO_YES_NO}" ]; then
+    echo "${AUTO_YES_NO}"
+    [ "${AUTO_YES_NO}" = "yes" ] && echo "yes" || echo "no"
+    return
+  fi
+
   local answer
   read -rp "${1} (Y/n): " answer
   answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
@@ -135,6 +141,8 @@ write_env() {
   local default_prompt default_provided value
   default_provided=$([ $# -gt 1 ] && echo 1 || echo 0)
   current_value="${!1}" # Check if the environment variable is already set
+
+  echo "${1}=$current_value"
 
   # If the variable exists in the environment, use its value
   if [ -n "$current_value" ]; then

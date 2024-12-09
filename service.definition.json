@@ -11,15 +11,17 @@
     { "name": "LLM_SELECTED_OPT", "label": "", "type": "string", "defaultValue": "$LLM_SELECTED_OPT" },
     { "name": "WATSONX_PROJECT_ID", "label": "", "type": "string", "defaultValue": "$WATSONX_PROJECT_ID" },
     { "name": "WATSONX_API_KEY", "label": "", "type": "string", "defaultValue": "$WATSONX_API_KEY" },
-    { "name": "WATSONX_REGION", "label": "", "type": "string", "defaultValue": "$WATSONX_REGION" }
+    { "name": "WATSONX_REGION", "label": "", "type": "string", "defaultValue": "$WATSONX_REGION" },
+    { "name": "AUTO_YES_NO", "label": "", "type": "string", "defaultValue": "$AUTO_YES_NO" }
   ],
   "deployment": {
     "services": {
       "$SERVICE_NAME": {
         "image": "$SERVICE_CONTAINER",
-        "binds": ["$MMS_SHARED_VOLUME:$VOLUME_MOUNT:rw"],
+        "binds": ["$MMS_SHARED_VOLUME:$VOLUME_MOUNT:rw","/var/run/docker.sock:/var/run/docker.sock"],
         "ports": [
         ],
+        "network_mode": "host",
         "privileged": true
       }
     }
