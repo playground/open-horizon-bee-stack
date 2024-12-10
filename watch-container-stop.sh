@@ -12,7 +12,7 @@ do
     # Check if the stopped container is the parent container
     if [[ "$STOPPED_CONTAINER" == "$HBS_CONTAINER_ID" ]]; then
       echo "Parent container has been stopped. Shutting down related containers..."
-      stop_related_containers
+      /app/bee-stack/bee-stack.sh stop
       sleep 45
       break
     fi
