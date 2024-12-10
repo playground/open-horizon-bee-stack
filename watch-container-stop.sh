@@ -1,19 +1,19 @@
 #!/bin/bash
 
-# Define the action to perform when a container is stopped
-on_container_stop() {
-  local container_id="$1"
-  local container_name=$(docker inspect --format '{{.Name}}' "$container_id" | sed 's/^\/\|\/$//g') # Remove leading/trailing slashes
+# Obtain the container ID of the current (open-horizon-bee-stack) container
+OHBS_CONTAINER_ID=$(cat /proc/self/cgroup | grep 'docker' | sed 's/.*\///')
 
-  echo "Container stopped: $container_name ($container_id)"
+# Monitor OHBS status
+while true; do
+  OHBS_STATUS=$(docker inspect --format '{{.State.Status}}' "$OHBS_CONTAINER_ID")
 
-  # Perform additional actions here, e.g., logging or stopping other containers
-  # Example: Stop another container
-  /app/bee-stack/bee-stack.sh stop
-}
+  # If the OHBS container is stopped, stop the related containers
+  if [[ "$OHBS_STATUS" == "exited" || "$OHBS_STATUS" == "dead" ]]; then
+      echo "OHBS container ($OHBS_CONTAINER_ID) has stopped."
+      /app/bee-stack/bee-stack.sh stop
+      break
+  fi
 
-# Monitor Docker events for "stop" events
-docker events --filter 'event=stop' --format '{{.ID}}' | while read -r container_id; do
-  # Call the action function when a stop event occurs
-  on_container_stop "$container_id"
+  # Sleep for a while before checking again
+  sleep 5
 done

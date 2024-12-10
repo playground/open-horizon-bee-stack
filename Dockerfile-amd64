@@ -68,6 +68,6 @@ RUN chmod +x /app/watch-container-stop.sh
 RUN echo "source /app/setup.sh" >> ~/.bashrc
 
 # Command to run at container start
-CMD ["bash", "-c", "/app/watch-container-stop.sh & while :; do sleep 30; done"]
+CMD ["/app/watch-container-stop.sh"]
 
 ENTRYPOINT ["./entrypoint.sh"]
