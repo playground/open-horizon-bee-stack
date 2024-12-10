@@ -4,20 +4,18 @@
 OHBS_CONTAINER_ID=$(cat /proc/self/cgroup | grep 'docker' | sed 's/.*\///')
 
 # Monitor OHBS status
-while true; do
-  OHBS_STATUS=$(docker inspect --format '{{.State.Status}}' "$OHBS_CONTAINER_ID")
+docker events --filter 'event=stop' | while read event
+do
+    # Extract the container name from the event
+    STOPPED_CONTAINER=$(echo "$event" | grep -oP 'container:\K\S+')
 
-  # If the OHBS container is stopped, stop the related containers
-  if [[ "$OHBS_STATUS" == "exited" || "$OHBS_STATUS" == "dead" ]]; then
-      echo "OHBS container ($OHBS_CONTAINER_ID) has stopped."
-      /app/bee-stack/bee-stack.sh stop
-      echo "Shutting down bee stack containers."
+    # Check if the stopped container is the parent container
+    if [[ "$STOPPED_CONTAINER" == "$HBS_CONTAINER_ID" ]]; then
+      echo "Parent container has been stopped. Shutting down related containers..."
+      stop_related_containers
       sleep 45
       break
-  fi
-
-  # Sleep for a while before checking again
-  sleep 5
+    fi
 done
 
 echo "Shutting down OHBS container."
