@@ -11,6 +11,7 @@ while true; do
   if [[ "$OHBS_STATUS" == "exited" || "$OHBS_STATUS" == "dead" ]]; then
       echo "OHBS container ($OHBS_CONTAINER_ID) has stopped."
       /app/bee-stack/bee-stack.sh stop
+      echo "Shutting down bee stack containers."
       sleep 45
       break
   fi
@@ -18,3 +19,7 @@ while true; do
   # Sleep for a while before checking again
   sleep 5
 done
+
+echo "Shutting down OHBS container."
+sleep 10
+exit 0
