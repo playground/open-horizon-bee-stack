@@ -1,6 +1,8 @@
 # Start with a base image that includes git
 FROM ubuntu:20.04
 
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+
 # Set environment variables to prevent interactive prompts during installation
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -12,6 +14,7 @@ RUN apt-get update && apt-get install -y \
 # Install dependencies for Docker and Compose
 RUN apt-get update && apt-get install -y \
     ca-certificates \
+    vim \
     curl \
     gnupg \
     lsb-release
@@ -34,13 +37,37 @@ RUN apt-get update && apt-get install -y \
 
 # Verify installation
 RUN docker --version && docker compose version
-    
+
+# Install NodeJS
+RUN curl -sL https://deb.nodesource.com/setup_20.x  | bash -
+    RUN apt-get -y install nodejs
+    RUN npm install -g npm
+
 # Set the working directory inside the container
 WORKDIR /app
 
-COPY ./setup.sh /app
+# Copy package files first
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy source files
+COPY . .
+
+# Build the TypeScript project
+RUN npm run build
+
+EXPOSE 8889
 
 # Make another script executable and run it
 RUN chmod +x /app/setup.sh
+RUN chmod +x /app/entrypoint.sh
+RUN chmod +x /app/watch-container-stop.sh
 
-CMD ["./setup.sh"]
+RUN echo "source /app/setup.sh" >> ~/.bashrc
+
+# Command to run at container start
+CMD ["/app/watch-container-stop.sh"]
+
+ENTRYPOINT ["./entrypoint.sh"]

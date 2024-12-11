@@ -7,17 +7,25 @@ set -e
 REPO_URL="https://github.com/i-am-bee/bee-stack.git"
 CLONE_DIR="bee-stack"
 
-# Check if the directory exists
-if [ -d "$DIR_NAME" ]; then
-  echo "Directory '$DIR_NAME' already exists. Skipping clone."
+if [ -d "$CLONE_DIR/.git" ]; then
+  echo "Directory '$CLONE_DIR' exists and is a git repository. Pulling latest changes..."
+  cd "$CLONE_DIR"
+  git pull
 else
-  # Clone the repository
-  echo "Cloning repository from $REPO_URL..."
+  echo "Directory '$CLONE_DIR' does not exist or is not a git repository. Cloning..."
   git clone "$REPO_URL"
 fi
 
-# Navigate into the cloned repository
-cd "$CLONE_DIR" || { echo "Failed to cd into $CLONE_DIR"; exit 1; }
+# Get the current working directory's basename
+current_dir=$(basename "$(pwd)")
+
+# Check if the current directory is 'app'
+if [ "$current_dir" == "app" ]; then
+  # Navigate into the cloned repository
+  cd "$CLONE_DIR" || { echo "Failed to cd into $CLONE_DIR"; exit 1; }
+fi
+
+echo "Current directory is: $(pwd)"
 
 # Ensure setup.sh is executable
 if [ -f "./bee-stack.sh" ]; then
