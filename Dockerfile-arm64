@@ -1,5 +1,7 @@
 # Start with a base image that includes git
-FROM arm64v8/ubuntu:20.04
+FROM ubuntu:20.04
+
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
 # Set environment variables to prevent interactive prompts during installation
 ENV DEBIAN_FRONTEND=noninteractive
@@ -7,13 +9,12 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install necessary tools (git, curl, etc.)
 RUN apt-get update && apt-get install -y \
     git \
-    sudo \
-    software-properties-common \
     && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies for Docker and Compose
 RUN apt-get update && apt-get install -y \
     ca-certificates \
+    vim \
     curl \
     gnupg \
     lsb-release
@@ -37,31 +38,36 @@ RUN apt-get update && apt-get install -y \
 # Verify installation
 RUN docker --version && docker compose version
 
-RUN echo $USER
-# Add a user (you can specify the username you prefer)
-RUN useradd -m beeuser
+# Install NodeJS
+RUN curl -sL https://deb.nodesource.com/setup_20.x  | bash -
+    RUN apt-get -y install nodejs
+    RUN npm install -g npm
 
-USER root
+# Set the working directory inside the container
+WORKDIR /app
 
-# Add the user to the docker group
-RUN usermod -aG docker beeuser
-RUN usermod -aG daemon beeuser
+# Copy package files first
+COPY package*.json ./
 
-# Give the user permission to run Docker commands without `sudo` (optional)
-RUN echo "beeuser ALL=(ALL) NOPASSWD: /usr/bin/docker" > /etc/sudoers.d/beeuser
+# Install dependencies
+RUN npm install
 
-RUN mkdir -p /home/beeuser 
-COPY setup.sh /home/beeuser/setup.sh
+# Copy source files
+COPY . .
 
-RUN ls -l /home/beeuser
+# Build the TypeScript project
+RUN npm run build
 
-# Make script executable and run it
-RUN chown beeuser:beeuser /home/beeuser/setup.sh
-RUN chmod +x /home/beeuser/setup.sh
+EXPOSE 8889
 
-# Switch to the user's home directory
-WORKDIR /home/beeuser
-# Set the user as the default user
-USER beeuser
+# Make another script executable and run it
+RUN chmod +x /app/setup.sh
+RUN chmod +x /app/entrypoint.sh
+RUN chmod +x /app/watch-container-stop.sh
 
-CMD ["./setup.sh"]
+RUN echo "source /app/setup.sh" >> ~/.bashrc
+
+# Command to run at container start
+CMD ["/app/watch-container-stop.sh"]
+
+ENTRYPOINT ["./entrypoint.sh"]
