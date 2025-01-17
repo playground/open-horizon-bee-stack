@@ -25,3 +25,10 @@ Enter path to your tempate file, for example "/home/oh/oh-in-container.json"
 Confirm and proceed to install.  Once installation is complete, open-horizon-bee-stack container will be started.  
 
 Go inside the container to start Bee Stack setup
+
+## Side notes
+  collector:
+    image: otel/opentelemetry-collector-contrib:0.112.0
+    volumes:
+      - /mms-shared/config.yaml:/etc/otelcol-contrib/
+    profiles: [ all, infra ]

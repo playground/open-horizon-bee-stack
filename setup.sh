@@ -7,6 +7,9 @@ set -e
 REPO_URL="https://github.com/i-am-bee/bee-stack.git"
 CLONE_DIR="bee-stack"
 
+# Stash local changes
+git stash --include-untracked
+
 if [ -d "$CLONE_DIR/.git" ]; then
   echo "Directory '$CLONE_DIR' exists and is a git repository. Pulling latest changes..."
   cd "$CLONE_DIR"
@@ -15,6 +18,9 @@ else
   echo "Directory '$CLONE_DIR' does not exist or is not a git repository. Cloning..."
   git clone "$REPO_URL"
 fi
+
+# Restore stashed changes
+git stash pop || echo "No stash to apply."
 
 # Get the current working directory's basename
 current_dir=$(basename "$(pwd)")
