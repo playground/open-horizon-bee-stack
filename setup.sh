@@ -33,6 +33,18 @@ fi
 
 echo "Current directory is: $(pwd)"
 
+# For mount volume to work, copy otel-collector-config.yaml to /mms-shared/config.yaml and update mount volume to /mms-shared/config.yaml:/etc/otelcol-contrib/
+cp otel-collector-config.yaml /mms-shared/config.yaml
+
+# Path to your YAML file
+yaml_file="docker-compose.yaml"
+
+# Replace the specified volume mapping
+sed -i.bak 's|\.\/otel-collector-config\.yaml:/etc/otelcol-contrib/config\.yaml|/mms-shared/config.yaml:/etc/otelcol-contrib/|' "$yaml_file"
+
+# Confirm the change
+echo "Updated $yaml_file"
+
 # Ensure setup.sh is executable
 if [ -f "./bee-stack.sh" ]; then
     chmod +x ./bee-stack.sh
