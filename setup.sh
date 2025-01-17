@@ -45,14 +45,38 @@ sed -i.bak 's|\.\/otel-collector-config\.yaml:/etc/otelcol-contrib/config\.yaml|
 # Confirm the change
 echo "Updated $yaml_file"
 
+# Function to prompt the user with a yes/no question
+ask_yes_no() {
+    local prompt="$1"
+    local response
+
+    while true; do
+        read -r -p "$prompt [yes/no]: " response
+        case "$response" in
+            [yY][eE][sS]|[yY]) echo "yes"; break ;;
+            [nN][oO]|[nN]) echo "no"; break ;;
+            *) echo "Invalid response. Please enter yes or no." ;;
+        esac
+    done
+}
+
 # Ensure setup.sh is executable
 if [ -f "./bee-stack.sh" ]; then
-    chmod +x ./bee-stack.sh
-    echo "Executing bee-stack.sh..."
+  chmod +x ./bee-stack.sh
+  echo "Executing bee-stack.sh..."
+  # Check if .env file exists in the current directory
+  if [ -f ".env" ]; then
+    if [ "$(ask_yes_no ".env file already exists. Do you want to run setup anyway?")" = 'no' ]; then
+      ./bee-stack.sh start
+    else
+      ./bee-stack.sh setup
+    fi
+  else
     ./bee-stack.sh setup
+  fi
 else
-    echo "setup.sh not found in $CLONE_DIR."
-    exit 1
+  echo "setup.sh not found in $CLONE_DIR."
+  exit 1
 fi
 
 # For mount volume to work, copy otel-collector-config.yaml to /mms-shared/config.yaml and update mount volume to /mms-shared/config.yaml:/etc/otelcol-contrib/
