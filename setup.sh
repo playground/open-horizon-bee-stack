@@ -78,15 +78,3 @@ else
   echo "setup.sh not found in $CLONE_DIR."
   exit 1
 fi
-
-# For mount volume to work, copy otel-collector-config.yaml to /mms-shared/config.yaml and update mount volume to /mms-shared/config.yaml:/etc/otelcol-contrib/
-cp otel-collector-config.yaml /mms-shared/config.yaml
-
-# Path to your YAML file
-yaml_file="docker-compose.yaml"
-
-# Replace the specified volume mapping
-sed -i.bak 's|\.\/otel-collector-config\.yaml:/etc/otelcol-contrib/config\.yaml|/mms-shared/config.yaml:/etc/otelcol-contrib/|' "$yaml_file"
-
-# Confirm the change
-echo "Updated $yaml_file"
