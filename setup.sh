@@ -37,7 +37,7 @@ echo "Current directory is: $(pwd)"
 cp otel-collector-config.yaml /mms-shared/config.yaml
 
 # Path to your YAML file
-yaml_file="/app/bee-stack/docker-compose.yaml"
+yaml_file="docker-compose.yml"
 
 # Replace the specified volume mapping
 sed -i.bak 's|\.\/otel-collector-config\.yaml:/etc/otelcol-contrib/config\.yaml|/mms-shared/config.yaml:/etc/otelcol-contrib/|' "$yaml_file"
