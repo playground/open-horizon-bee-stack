@@ -47,7 +47,9 @@
     "LLM_SELECTED_OPT": "watsonx",
     "WATSONX_PROJECT_ID": "",
     "WATSONX_API_KEY": "",
-    "WATSONX_REGION": "us-south"
+    "WATSONX_REGION": "us-south",
+    "OLLAMA_URL": "",
+    "OPENAI_API_KEY": ""
   },
   "register": {
     "policy": {

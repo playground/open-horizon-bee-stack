@@ -190,9 +190,9 @@ setup() {
   rm -f "$TMP_ENV_FILE"
   if [ -n "${LLM_SELECTED_OPT}" ] && [ -n "${WATSONX_PROJECT_ID}" ] && [ -n "${WATSONX_API_KEY}" ] && [ -n "${WATSONX_REGION}" ]; then
     configure_watsonx
-  else if [ "${LLM_SELECTED_OPT}" = "openai" ] && [ -n "${OPENAI_API_KEY}" ]; then
+  elif [ "${LLM_SELECTED_OPT}" = "openai" ] && [ -n "${OPENAI_API_KEY}" ]; then
     configure_openai
-  else if [ "${LLM_SELECTED_OPT}" = "ollama" ] && [ -n "${OLLAMA_URL}" ]; then
+  elif [ "${LLM_SELECTED_OPT}" = "ollama" ] && [ -n "${OLLAMA_URL}" ]; then
     configure_ollama
   else
     choose "Choose LLM provider" "watsonx" "ollama" "openai"
