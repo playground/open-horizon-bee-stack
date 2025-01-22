@@ -43,32 +43,20 @@ choose() {
     echo "[${i}]: ${!choice}"
   done
 
-  if [ -n "${LLM_SELECTED_OPT}" ]; then
-    echo "LLM_SELECTED_OPT is set to '${LLM_SELECTED_OPT}'. Automatically selecting."
-    SELECTED_OPT="${LLM_SELECTED_OPT}"
-    configure_watsonx
-  else
-    while true; do
-      read -rp "Select ${range}: " SELECTED_NUM
-      if ! [[ "$SELECTED_NUM" =~ ^[0-9]+$ ]]; then print_error "Please enter a valid number"; continue; fi
-      if [ "$SELECTED_NUM" -lt 1 ] || [ "$SELECTED_NUM" -ge "$#" ]; then
-        print_error "Number is not in ${range}"; continue;
-      fi
-      break
-    done
+  while true; do
+    read -rp "Select ${range}: " SELECTED_NUM
+    if ! [[ "$SELECTED_NUM" =~ ^[0-9]+$ ]]; then print_error "Please enter a valid number"; continue; fi
+    if [ "$SELECTED_NUM" -lt 1 ] || [ "$SELECTED_NUM" -ge "$#" ]; then
+      print_error "Number is not in ${range}"; continue;
+    fi
+    break
+  done
 
-    local idx=$((SELECTED_NUM + 1))
-    SELECTED_OPT="${!idx}"
-  fi
+  local idx=$((SELECTED_NUM + 1))
+  SELECTED_OPT="${!idx}"
 }
 
 ask_yes_no() {
-  if [ -n "${AUTO_YES_NO}" ]; then
-    echo "${AUTO_YES_NO}"
-    [ "${AUTO_YES_NO}" = "yes" ] && echo "yes" || echo "no"
-    return
-  fi
-
   local answer
   read -rp "${1} (Y/n): " answer
   answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
@@ -140,21 +128,7 @@ trim() {
 write_env() {
   local default_prompt default_provided value
   default_provided=$([ $# -gt 1 ] && echo 1 || echo 0)
-  current_value="${!1}" # Check if the environment variable is already set
-
-  echo "${1}=$current_value"
-
-  # If the variable exists in the environment, use its value
-  if [ -n "$current_value" ]; then
-    value="$current_value"
-    echo "$1=$value" >> "$TMP_ENV_FILE"
-    export "${1}=${value}"
-    return
-  fi
-
-  # Build the prompt if no existing environment variable is found
   default_prompt="$([ "$default_provided" -eq 1 ] && echo " (leave empty for default '${2}')" || echo "")"
-
   while true; do
     read -rp "Provide ${1}${default_prompt}: " value
     if [ -z "$value" ] && [ "$default_provided" -eq 0 ]; then
@@ -170,13 +144,8 @@ write_env() {
 }
 
 write_backend() {
-  echo LLM_BACKEND="$1" >> "$TMP_ENV_FILE"
+  echo AI_BACKEND="$1" >> "$TMP_ENV_FILE"
   echo EMBEDDING_BACKEND="$1" >> "$TMP_ENV_FILE"
-}
-
-configure_bam() {
-  write_backend bam
-  write_env BAM_API_KEY
 }
 
 configure_watsonx() {
@@ -205,14 +174,40 @@ configure_openai() {
   write_env OPENAI_API_KEY
 }
 
+configure_text_extraction() {
+  echo FEATURE_FLAGS=\''{"Knowledge":true,"Files":true,"TextExtraction":true,"FunctionTools":true,"Observe":true,"Projects":true}'\' >> "$TMP_ENV_FILE"
+  echo TEXT_EXTRACTION_ENABLED=true >> "$TMP_ENV_FILE"
+  echo EXTRACTION_BACKEND=docling >> "$TMP_ENV_FILE"
+}
+
+configure_no_text_extraction() {
+  echo FEATURE_FLAGS=\''{"Knowledge":false,"Files":true,"TextExtraction":false,"FunctionTools":true,"Observe":true,"Projects":true}'\' >> "$TMP_ENV_FILE"
+  echo EXTRACTION_BACKEND=wdu >> "$TMP_ENV_FILE"
+}
+
 setup() {
   printf "🐝 Welcome to the bee-stack! You're just a few questions away from building agents!\n(Press ^C to exit)\n\n"
   rm -f "$TMP_ENV_FILE"
-  choose "Choose LLM provider" "watsonx" "ollama" "bam" "openai"
-  [[ $SELECTED_OPT == 'bam' ]] && configure_bam
-  [[ $SELECTED_OPT == 'ollama' ]] && configure_ollama
-  [[ $SELECTED_OPT == 'watsonx' ]] && configure_watsonx
-  [[ $SELECTED_OPT == 'openai' ]] && configure_openai
+  if [ -n "${LLM_SELECTED_OPT}" ] && [ -n "${WATSONX_PROJECT_ID}" ] && [ -n "${WATSONX_API_KEY}" ] && [ -n "${WATSONX_REGION}" ]; then
+    configure_watsonx
+  else if [ "${LLM_SELECTED_OPT}" = "openai" ] && [ -n "${OPENAI_API_KEY}" ]; then
+    configure_openai
+  else if [ "${LLM_SELECTED_OPT}" = "ollama" ] && [ -n "${OLLAMA_URL}" ]; then
+    configure_ollama
+  else
+    choose "Choose LLM provider" "watsonx" "ollama" "openai"
+    [[ $SELECTED_OPT == 'ollama' ]] && configure_ollama
+    [[ $SELECTED_OPT == 'watsonx' ]] && configure_watsonx
+    [[ $SELECTED_OPT == 'openai' ]] && configure_openai
+  fi
+  text_extraction_enabled=$(ask_yes_no \
+    "Do you want to enable docling text extraction? ⚠️ Requires >= 15GB of RAM **CONFIGURED** for the container runtime ⚠️"
+  )
+  if [[ $text_extraction_enabled == 'yes' ]]; then
+    configure_text_extraction
+  else
+    configure_no_text_extraction
+  fi
 
   if [ -f ".env" ]; then
     [ "$(ask_yes_no ".env file already exists. Do you want to override it?")" = 'no' ] && exit 1
@@ -232,17 +227,24 @@ start_stack() {
   fi
 
   ${RUNTIME} compose --profile all up -d
+
+  if grep -q TEXT_EXTRACTION_ENABLED=true .env; then
+    ${RUNTIME} compose --profile text-extraction up -d
+  fi
+
   printf "Done. You can visit the UI at ${BLUE}http://localhost:3000${NC}\n"
 }
 
 stop_stack() {
   ${RUNTIME} compose --profile all down
   ${RUNTIME} compose --profile infra down
+  ${RUNTIME} compose --profile text-extraction down
 }
 
 clean_stack() {
   ${RUNTIME} compose --profile all down --volumes
   ${RUNTIME} compose --profile infra down --volumes
+  ${RUNTIME} compose --profile text-extraction down --volumes
   rm -rf tmp
   mkdir -p ./tmp/code-interpreter-storage
 }

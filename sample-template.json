@@ -43,7 +43,11 @@
   "local": {
     "YOUR_DOCKERHUB_ID": "<your-docker-id>",
     "DOCKER_REGISTRY": "hub.docker.com",
-    "DOCKER_TOKEN": "<docker-token>"
+    "DOCKER_TOKEN": "<docker-token>",
+    "LLM_SELECTED_OPT": "watsonx",
+    "WATSONX_PROJECT_ID": "",
+    "WATSONX_API_KEY": "",
+    "WATSONX_REGION": "us-south"
   },
   "register": {
     "policy": {

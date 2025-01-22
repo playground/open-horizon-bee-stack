@@ -60,6 +60,7 @@ ask_yes_no() {
     done
 }
 
+cp -f /app/bee-stack.sh /app/bee-stack
 # Ensure setup.sh is executable
 if [ -f "./bee-stack.sh" ]; then
   chmod +x ./bee-stack.sh
