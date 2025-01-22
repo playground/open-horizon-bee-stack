@@ -189,11 +189,11 @@ setup() {
   printf "🐝 Welcome to the bee-stack! You're just a few questions away from building agents!\n(Press ^C to exit)\n\n"
   rm -f "$TMP_ENV_FILE"
   if [ -n "${LLM_SELECTED_OPT}" ] && [ -n "${WATSONX_PROJECT_ID}" ] && [ -n "${WATSONX_API_KEY}" ] && [ -n "${WATSONX_REGION}" ]; then
-    configure_watsonx
+    write_backend watsonx
   elif [ "${LLM_SELECTED_OPT}" = "openai" ] && [ -n "${OPENAI_API_KEY}" ]; then
-    configure_openai
+    write_backend openai
   elif [ "${LLM_SELECTED_OPT}" = "ollama" ] && [ -n "${OLLAMA_URL}" ]; then
-    configure_ollama
+    write_backend ollama
   else
     choose "Choose LLM provider" "watsonx" "ollama" "openai"
     [[ $SELECTED_OPT == 'ollama' ]] && configure_ollama
