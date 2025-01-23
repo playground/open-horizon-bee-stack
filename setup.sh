@@ -69,6 +69,9 @@ if [ -f "./bee-stack.sh" ]; then
   if [ -f ".env" ]; then
     if [ "$(ask_yes_no ".env file already exists. Do you want to run setup anyway?")" = 'no' ]; then
       ./bee-stack.sh start
+    elif [ "$(ask_yes_no "Would like to provide your own credentials?")" = 'yes' ]; then
+      unset WATSONX_API_KEY
+      unset WATSONX_PROJECT_ID
     else
       ./bee-stack.sh setup
     fi
