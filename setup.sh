@@ -72,6 +72,7 @@ if [ -f "./bee-stack.sh" ]; then
     elif [ "$(ask_yes_no "Would like to provide your own credentials?")" = 'yes' ]; then
       unset WATSONX_API_KEY
       unset WATSONX_PROJECT_ID
+      ./bee-stack.sh setup
     else
       ./bee-stack.sh setup
     fi
